@@ -1,0 +1,52 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: microsoft/aspnetcore-build:2
+      - image: postgres:9.5
+        environment:
+        - POSTGRES_USER=readmore-test
+        - POSTGRES_PASSWORD=readmore-test
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run: dotnet restore ./ReadMoreAPI.sln
+
+      - run:
+          name: Unit Tests
+          command: |
+            dotnet test ./PocketLibTests/PocketLibTests.csproj
+            dotnet test ./ReadMoreAPITests/ReadMoreAPITests.csproj
+
+      - run:
+          name: Integration Tests
+          command: dotnet test ./ReadMoreDataTests/ReadMoreDataTests.csproj
+          environment:
+            DATABASE_URL: Host=localhost;Username=readmore-test;Password=readmore-test;Database=readmore-test
+
+      - setup_remote_docker
+
+      - deploy:
+          name: Publish to Heroku Container Registry
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              wget -qO- https://cli-assets.heroku.com/install-ubuntu.sh | sh
+
+              .circleci/setup-heroku-credentials.sh
+              
+              set -x
+              VER="17.03.0-ce"
+              curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+              tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+              mv /tmp/docker/* /usr/bin
+              
+              heroku container:login
+
+              dotnet publish ./ReadMoreAPI.sln -c Release -o ./obj/Docker/publish
+              docker build ReadMoreAPI -t registry.heroku.com/read-more-api/web
+              docker push registry.heroku.com/read-more-api/web
+            fi
+      

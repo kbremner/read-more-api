@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_USER: readmore
+      
+  readmoreapi:
+    image: readmoreapi
+    environment:
+      DATABASE_URL: postgres://readmore:supersecretpassword@db/readmore
+    build:
+      context: ./ReadMoreAPI
+      dockerfile: Dockerfile
+    links:
+    - db

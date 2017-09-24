@@ -1,0 +1,9 @@
+﻿<ProjectConfiguration>
+  <Settings>
+    <AdditionalFilesToIncludeForProject>
+      <Value>..\ReadMoreAPI\Migrations\**.*</Value>
+    </AdditionalFilesToIncludeForProject>
+    <HiddenComponentWarnings />
+    <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
+  </Settings>
+</ProjectConfiguration>

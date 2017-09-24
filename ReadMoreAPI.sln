@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadMoreAPI", "ReadMoreAPI\ReadMoreAPI.csproj", "{F61BE3D4-75BE-45D0-90C9-DF40661753F8}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{0D3BCE0F-5D27-4091-A24F-4EFB9C84CE23}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadMoreAPITests", "ReadMoreAPITests\ReadMoreAPITests.csproj", "{C11DA20B-C867-4DD9-BCC3-B691019CC331}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocketLib", "PocketLib\PocketLib.csproj", "{0575A94C-8744-43D6-BB6A-D55EF8C75E7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocketLibTests", "PocketLibTests\PocketLibTests.csproj", "{A7A3C8E8-AB69-4AE5-A8BD-2182085FA580}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadMoreData", "ReadMoreData\ReadMoreData.csproj", "{83A0A7D6-2922-4CE5-84E9-E2D71BAFE39F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadMoreDataTests", "ReadMoreDataTests\ReadMoreDataTests.csproj", "{94A61166-183F-4C3D-AE90-CAA413B2F343}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F61BE3D4-75BE-45D0-90C9-DF40661753F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F61BE3D4-75BE-45D0-90C9-DF40661753F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F61BE3D4-75BE-45D0-90C9-DF40661753F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F61BE3D4-75BE-45D0-90C9-DF40661753F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D3BCE0F-5D27-4091-A24F-4EFB9C84CE23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D3BCE0F-5D27-4091-A24F-4EFB9C84CE23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D3BCE0F-5D27-4091-A24F-4EFB9C84CE23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C11DA20B-C867-4DD9-BCC3-B691019CC331}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C11DA20B-C867-4DD9-BCC3-B691019CC331}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C11DA20B-C867-4DD9-BCC3-B691019CC331}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C11DA20B-C867-4DD9-BCC3-B691019CC331}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0575A94C-8744-43D6-BB6A-D55EF8C75E7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0575A94C-8744-43D6-BB6A-D55EF8C75E7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0575A94C-8744-43D6-BB6A-D55EF8C75E7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0575A94C-8744-43D6-BB6A-D55EF8C75E7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7A3C8E8-AB69-4AE5-A8BD-2182085FA580}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7A3C8E8-AB69-4AE5-A8BD-2182085FA580}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7A3C8E8-AB69-4AE5-A8BD-2182085FA580}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7A3C8E8-AB69-4AE5-A8BD-2182085FA580}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83A0A7D6-2922-4CE5-84E9-E2D71BAFE39F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83A0A7D6-2922-4CE5-84E9-E2D71BAFE39F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83A0A7D6-2922-4CE5-84E9-E2D71BAFE39F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83A0A7D6-2922-4CE5-84E9-E2D71BAFE39F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94A61166-183F-4C3D-AE90-CAA413B2F343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94A61166-183F-4C3D-AE90-CAA413B2F343}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94A61166-183F-4C3D-AE90-CAA413B2F343}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94A61166-183F-4C3D-AE90-CAA413B2F343}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A36716CB-4F23-46BE-8C89-BD3438DFCB0C}
+	EndGlobalSection
+EndGlobal
