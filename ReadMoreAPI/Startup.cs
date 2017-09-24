@@ -84,7 +84,6 @@ namespace ReadMoreAPI
             services.AddDataProtection()
                 .SetApplicationName("readmore-api")
                 .AddKeyManagementOptions(options => options.XmlRepository = sp.GetService<IXmlRepository>());
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
