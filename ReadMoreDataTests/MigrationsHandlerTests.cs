@@ -13,15 +13,21 @@ namespace ReadMoreDataTests
     [TestCategory("DB Tests")]
     [TestClass]
     [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-    public class MigrationsHandlerTests : IDisposable
+    public class MigrationsHandlerTests
     {
-        private readonly PostgresTestHelper _postgresTestHelper;
+        private PostgresTestHelper _postgresTestHelper;
 
-        public MigrationsHandlerTests()
+        [TestInitialize]
+        public void Setup()
         {
-            // During CI builds, DB URL will come from environment variable
             _postgresTestHelper = new PostgresTestHelper();
             _postgresTestHelper.ClearDb();
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            _postgresTestHelper.Dispose();
         }
 
         [TestMethod]
@@ -50,14 +56,14 @@ namespace ReadMoreDataTests
         {
             var files = PostgresTestHelper.GetMigrationScripts();
 
-            var result = MigrationsHandler.Migrate(_postgresTestHelper.Connection, files);
+            var result = MigrationsHandler.Migrate(_postgresTestHelper.Connection, files).ToList();
 
-            var executedScripts = _postgresTestHelper.GetExecutedScripts();
+            var executedScripts = _postgresTestHelper.GetExecutedScripts().ToList();
 
             foreach (var file in files)
             {
-                Assert.IsTrue(executedScripts.Contains(file.Name), $"Executed scripts did not contain script {file.Name}");
-                Assert.IsTrue(result.Contains(file), $"Migration result did not contain file {file.Name}");
+                CollectionAssert.Contains(executedScripts, file.Name, $"Executed scripts did not contain script {file.Name}");
+                CollectionAssert.Contains(result, file, $"Migration result did not contain file {file.Name}");
             }
         }
 
@@ -121,11 +127,6 @@ namespace ReadMoreDataTests
 
             Assert.IsTrue(_postgresTestHelper.DoesTableExist("XmlKeys"));
             Assert.IsTrue(_postgresTestHelper.DoesTableExist("PocketAccounts"));
-        }
-
-        public void Dispose()
-        {
-            _postgresTestHelper.Dispose();
         }
     }
 }

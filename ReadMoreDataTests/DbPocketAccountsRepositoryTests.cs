@@ -11,14 +11,21 @@ namespace ReadMoreDataTests
     [ExclusivelyUses("Database")]
     [TestCategory("DB Tests")]
     [TestClass]
-    public class DbPocketAccountsRepositoryTests : IDisposable
+    public class DbPocketAccountsRepositoryTests
     {
-        private readonly PostgresTestHelper _postgresTestHelper;
+        private PostgresTestHelper _postgresTestHelper;
 
-        public DbPocketAccountsRepositoryTests()
+        [TestInitialize]
+        public void Setup()
         {
             _postgresTestHelper = new PostgresTestHelper();
             _postgresTestHelper.SetupDb();
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            _postgresTestHelper.Dispose();
         }
 
         [TestMethod]
@@ -125,11 +132,6 @@ namespace ReadMoreDataTests
             Assert.AreEqual(insertedAccount.RequestToken, result.RequestToken);
             Assert.AreEqual(insertedAccount.AccessToken, result.AccessToken);
             Assert.AreEqual(insertedAccount.RedirectUrl, result.RedirectUrl);
-        }
-
-        public void Dispose()
-        {
-            _postgresTestHelper.Dispose();
         }
     }
 }

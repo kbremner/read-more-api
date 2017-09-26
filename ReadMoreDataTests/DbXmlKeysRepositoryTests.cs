@@ -11,14 +11,21 @@ namespace ReadMoreDataTests
     [ExclusivelyUses("Database")]
     [TestCategory("DB Tests")]
     [TestClass]
-    public class DbXmlKeysRepositoryTests : IDisposable
+    public class DbXmlKeysRepositoryTests
     {
-        private readonly PostgresTestHelper _postgresTestHelper;
+        private PostgresTestHelper _postgresTestHelper;
 
-        public DbXmlKeysRepositoryTests()
+        [TestInitialize]
+        public void Setup()
         {
             _postgresTestHelper = new PostgresTestHelper();
             _postgresTestHelper.SetupDb();
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            _postgresTestHelper.Dispose();
         }
 
         [TestMethod]
@@ -90,12 +97,6 @@ namespace ReadMoreDataTests
             repo.FindAll();
 
             Assert.AreEqual(2, count);
-        }
-
-
-        public void Dispose()
-        {
-            _postgresTestHelper.Dispose();
         }
     }
 }

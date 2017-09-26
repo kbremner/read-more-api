@@ -38,9 +38,10 @@ namespace ReadMoreDataTests
 
         public bool DoesTableExist(string tableName)
         {
-            return 1 == Connection.ExecuteScalar<int>(@"SELECT count(*)
+            var result = Connection.ExecuteScalar<int>(@"SELECT count(*)
             FROM information_schema.tables
             WHERE table_name = @tableName", new { tableName });
+            return result == 1;
         }
 
         public IEnumerable<string> GetExecutedScripts()
