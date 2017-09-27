@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PocketLib;
@@ -38,21 +39,9 @@ namespace ReadMoreAPI.Controllers
         [RequiredQueryParameter(Name = "xAccessToken")]
         public async Task<IActionResult> CompleteAuth(string xAccessToken)
         {
-            PocketAccount account;
-            try {
-                account = await _service.CreatePocketAccessTokenForAccountAsync(xAccessToken);
-            }
-            catch (PocketException e)
-            {
-                _logger.LogError(e, "Failed to create pocket access token");
-                return StatusCode((int)HttpStatusCode.Forbidden, new { error = "Failed to complete pocket authorisation" });
-            }
-
-            // 4 - append our access token to caller redirect URL from PocketAccount
-            var url = _service.AppendAccessTokenToUrl(account, account.RedirectUrl);
-
-            // 5 - redirect to this caller redirect URL
-            return Redirect(url);
+            // Upgrade the request token and redirect to the caller's provided redirect URL
+            var uri = await _service.UpgradeRequestTokenAsync(xAccessToken);
+            return Redirect(uri.ToString());
         }
 
         [HttpGet("next")]

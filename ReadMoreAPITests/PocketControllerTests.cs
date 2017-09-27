@@ -1,3 +1,4 @@
+using System;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using PocketLib;
+using ReadMoreAPI;
 using ReadMoreData.Models;
 
 namespace ReadMoreAPITests
@@ -18,7 +20,7 @@ namespace ReadMoreAPITests
         private const string PocketUrl = "POCKET_URL";
         private const string ActionUrl = "ACTION_URL";
         private const string AccessToken = "ACCESS_TOKEN";
-        private const string UrlWithAccessToken = "URL_WITH_ACCESS_TOKEN";
+        private static readonly Uri UrlWithAccessToken = new Uri("http://url-with-access-token");
         private const string PocketAccessToken = "POCKET_ACCESS_TOKEN";
         private const string CallerUrl = "CALLER_URL";
         private const string ArticleId = "ITEM_ID";
@@ -46,8 +48,7 @@ namespace ReadMoreAPITests
             _mockUrlHelper.Setup(s => s.Action(It.Is<UrlActionContext>(c => c.Action == "ArchiveArticleAsync"))).Returns(ArchiveUrl);
 
             _account = new PocketAccount { RedirectUrl = CallerUrl, AccessToken = PocketAccessToken };
-            _mockService.Setup(s => s.CreatePocketAccessTokenForAccountAsync(AccessToken)).ReturnsAsync(_account);
-            _mockService.Setup(s => s.AppendAccessTokenToUrl(_account, CallerUrl)).Returns(UrlWithAccessToken);
+            _mockService.Setup(s => s.UpgradeRequestTokenAsync(AccessToken)).ReturnsAsync(UrlWithAccessToken);
             _mockService.Setup(s => s.GetNextArticleAsync(AccessToken)).ReturnsAsync(_article);
 
             _controller = new PocketController(Mock.Of<ILogger<PocketController>>(), _mockService.Object)
@@ -87,7 +88,7 @@ namespace ReadMoreAPITests
         {
             await _controller.CompleteAuth(AccessToken);
 
-            _mockService.Verify(s => s.CreatePocketAccessTokenForAccountAsync(AccessToken), Times.Exactly(1));
+            _mockService.Verify(s => s.UpgradeRequestTokenAsync(AccessToken), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -104,18 +105,6 @@ namespace ReadMoreAPITests
             var result = (RedirectResult) await _controller.CompleteAuth(AccessToken);
 
             Assert.AreEqual(UrlWithAccessToken, result.Url);
-        }
-
-        [TestMethod]
-        public async Task CompleteAuthReturnsAForbiddenResponseIfFailsToCreatePocketAccessToken()
-        {
-            _mockService.Setup(s => s.CreatePocketAccessTokenForAccountAsync(AccessToken)).Throws<PocketException>();
-
-            var result = await _controller.CompleteAuth(AccessToken);
-
-            Assert.IsInstanceOfType(result, typeof(ObjectResult));
-            var objectResult = (ObjectResult) result;
-            Assert.AreEqual(403, objectResult.StatusCode);
         }
 
         [TestMethod]

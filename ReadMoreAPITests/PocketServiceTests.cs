@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReadMoreAPI;
 
 namespace ReadMoreAPITests
 {
@@ -47,7 +48,8 @@ namespace ReadMoreAPITests
             {
                 Id = _accountId,
                 RequestToken = RequestCode,
-                AccessToken = PocketAccessToken
+                AccessToken = PocketAccessToken,
+                RedirectUrl = CallerCallbackUrl
             };
             _article = new PocketArticle(ArticleId, ArticleUrl, ArticleTitle);
 
@@ -141,7 +143,7 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task GetsPocketAccountAssociatedWithAccessTokenWhenCreatingPocketAccessToken()
         {
-            await _service.CreatePocketAccessTokenForAccountAsync(AccessToken);
+            await _service.UpgradeRequestTokenAsync(AccessToken);
 
             _mockRepo.Verify(r => r.FindByIdAsync(_accountId), Times.Exactly(1));
         }
@@ -149,31 +151,26 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task CreatesPocketAccessTokenUsingRequestCodeAssociatedWithBackendAccessToken()
         {
-            await _service.CreatePocketAccessTokenForAccountAsync(AccessToken);
+            await _service.UpgradeRequestTokenAsync(AccessToken);
 
             _mockClient.Verify(c => c.CreateAccessTokenAsync(RequestCode), Times.Exactly(1));
         }
 
         [TestMethod]
-        public async Task ReturnedPocketAccountIncludesCreatedPocketAccessToken()
+        public async Task ReturnedUriIncludesCreatedPocketAccessToken()
         {
-            var result = await _service.CreatePocketAccessTokenForAccountAsync(AccessToken);
+            var uriBuilder = new UriBuilder(CallerCallbackUrl);
+            uriBuilder.AppendToQuery("xAccessToken", AccessToken);
+            
+            var result = await _service.UpgradeRequestTokenAsync(AccessToken);
 
-            Assert.AreEqual(PocketAccessToken, result.AccessToken);
-        }
-
-        [TestMethod]
-        public async Task ClearsRequestCodeInReturnedPocketAccount()
-        {
-            var result = await _service.CreatePocketAccessTokenForAccountAsync(AccessToken);
-
-            Assert.IsNull(result.RequestToken);
+            Assert.AreEqual(uriBuilder.Uri, result);
         }
 
         [TestMethod]
         public async Task UpdatesStoredPocketAccountWithCreatedPocketAccessToken()
         {
-            await _service.CreatePocketAccessTokenForAccountAsync(AccessToken);
+            await _service.UpgradeRequestTokenAsync(AccessToken);
 
             _mockRepo.Verify(r => r.UpdateAsync(It.Is<PocketAccount>(a => a.AccessToken == PocketAccessToken)));
         }
@@ -181,7 +178,7 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task ClearsRequestCodeInStoredPocketAccount()
         {
-            await _service.CreatePocketAccessTokenForAccountAsync(AccessToken);
+            await _service.UpgradeRequestTokenAsync(AccessToken);
 
             _mockRepo.Verify(r => r.UpdateAsync(It.Is<PocketAccount>(a => a.RequestToken == null)));
         }
@@ -191,16 +188,21 @@ namespace ReadMoreAPITests
         {
             _mockClient.Setup(c => c.CreateAccessTokenAsync(RequestCode)).Throws<PocketException>();
 
-            try
-            {
-                await _service.CreatePocketAccessTokenForAccountAsync(AccessToken);
-            }
-            catch (PocketException)
-            {
-                // no-op
-            }
+            await _service.UpgradeRequestTokenAsync(AccessToken);
 
             _mockRepo.Verify(r => r.DeleteAsync(_account), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task ReturnedUriIncludesErrorIfClientThrowsExceptionWhenCreatingPocketAccessToken()
+        {
+            var uriBuilder = new UriBuilder(CallerCallbackUrl);
+            uriBuilder.AppendToQuery("error", "auth_failed");
+            _mockClient.Setup(c => c.CreateAccessTokenAsync(RequestCode)).Throws<PocketException>();
+
+            var result = await _service.UpgradeRequestTokenAsync(AccessToken);
+
+            Assert.AreEqual(uriBuilder.Uri, result);
         }
 
         [TestMethod]

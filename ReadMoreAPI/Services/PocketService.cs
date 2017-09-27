@@ -55,31 +55,35 @@ namespace ReadMoreAPI.Services
             return requestCode.ToAuthUrl();
         }
 
-        public async Task<PocketAccount> CreatePocketAccessTokenForAccountAsync(string accountAccessToken)
+        public async Task<Uri> UpgradeRequestTokenAsync(string accountAccessToken)
         {
-            // 1 - retrieve PocketAccount for access token
+            // retrieve PocketAccount for access token
             var id = _protector.Unprotect(accountAccessToken);
             var account = await _repo.FindByIdAsync(new Guid(id));
+            var uriBuilder = new UriBuilder(account.RedirectUrl);
 
-            // 2 - convert request token from PocketAccount in to pocket access token
-            string pocketAccessToken;
             try
             {
-                pocketAccessToken = await _client.CreateAccessTokenAsync(account.RequestToken);
+                // convert request token from PocketAccount in to pocket access token
+                account.AccessToken = await _client.CreateAccessTokenAsync(account.RequestToken);
+                account.RequestToken = null;
+
+                // update PocketAccount with pocket access token
+                await _repo.UpdateAsync(account);
+
+                // add the access token to the redirect url
+                uriBuilder.AppendToQuery("xAccessToken", accountAccessToken);
             }
             catch (PocketException)
             {
                 // authentication failed, clean up by deleting the PocketAccount
                 await _repo.DeleteAsync(account);
-                throw;
+                // add an error query paramter to the redirect url
+                uriBuilder.AppendToQuery("error", "auth_failed");
             }
 
-            // 3 - update PocketAccount with pocket access token
-            account.AccessToken = pocketAccessToken;
-            account.RequestToken = null;
-            await _repo.UpdateAsync(account);
-
-            return account;
+            // return the updated provided 
+            return uriBuilder.Uri;
         }
 
         public async Task<PocketArticle> GetNextArticleAsync(string accountAccessToken)
@@ -110,14 +114,7 @@ namespace ReadMoreAPI.Services
         {
             var protectedAccessToken = _protector.Protect(account.Id.ToString());
             var uri = new UriBuilder(url);
-            if (string.IsNullOrWhiteSpace(uri.Query))
-            {
-                uri.Query = $"xAccessToken={protectedAccessToken}";
-            }
-            else
-            {
-                uri.Query += $"&xAccessToken={protectedAccessToken}";
-            }
+            uri.AppendToQuery("xAccessToken", protectedAccessToken);
             return uri.ToString();
         }
     }
