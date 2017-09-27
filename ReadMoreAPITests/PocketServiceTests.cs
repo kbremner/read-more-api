@@ -17,17 +17,17 @@ namespace ReadMoreAPITests
     [TestClass]
     public class PocketServiceTests
     {
-        private const string BaseUri = "BASE_URI";
-        private const string RedirectUri = "REDIRECT_URI";
+        private static readonly Uri BaseUri = new Uri("http://base-uri/");
+        private static readonly Uri RedirectUri = new Uri("http://redirect-uri/");
         private const string RequestCode = "REQUEST_CODE";
-        private const string CallbackUrl = "http://callback_url:80/";
-        private const string CallerCallbackUrl = "CALLER_CALLBACK_URL";
+        private static readonly Uri CallbackUrl = new Uri("http://callback_url:80/");
+        private static readonly Uri CallerCallbackUrl = new Uri("http://caller-callback-url/");
         private const string AccessToken = "ACCESS_TOKEN";
         private static readonly byte[] AccessTokenBytes = Encoding.UTF8.GetBytes(AccessToken);
         private static readonly string ProtectedAccessToken = WebEncoders.Base64UrlEncode(AccessTokenBytes);
         private const string PocketAccessToken = "POCKET_ACCESS_TOKEN";
         private const string ArticleId = "ARTICLE_ID";
-        private const string ArticleUrl = "ARTICLE_URL";
+        private static readonly Uri ArticleUrl = new Uri("http://article-url/");
         private const string ArticleTitle = "ARTICLE_TITLE";
         private PocketArticle _article;
         private Guid _accountId;
@@ -49,7 +49,7 @@ namespace ReadMoreAPITests
                 Id = _accountId,
                 RequestToken = RequestCode,
                 AccessToken = PocketAccessToken,
-                RedirectUrl = CallerCallbackUrl
+                RedirectUrl = CallerCallbackUrl.ToString()
             };
             _article = new PocketArticle(ArticleId, ArticleUrl, ArticleTitle);
 
@@ -62,7 +62,7 @@ namespace ReadMoreAPITests
             _mockRepo.Setup(r => r.FindByIdAsync(_accountId)).ReturnsAsync(_account);
             
             _mockClient = new Mock<IPocketClient>();
-            _mockClient.Setup(c => c.CreateRequestCodeAsync(It.IsAny<string>())).ReturnsAsync(_code);
+            _mockClient.Setup(c => c.CreateRequestCodeAsync(It.IsAny<Uri>())).ReturnsAsync(_code);
             _mockClient.Setup(c => c.CreateAccessTokenAsync(RequestCode)).ReturnsAsync(PocketAccessToken);
             _mockClient.Setup(c => c.GetRandomArticleAsync(PocketAccessToken, 200)).ReturnsAsync(_article);
 
@@ -87,7 +87,7 @@ namespace ReadMoreAPITests
         {
             await _service.GenerateAuthUrlAsync(CallbackUrl, CallerCallbackUrl);
 
-            _mockRepo.Verify(r => r.InsertAsync(It.Is<PocketAccount>(a => a.RedirectUrl == CallerCallbackUrl)), Times.Exactly(1));
+            _mockRepo.Verify(r => r.InsertAsync(It.Is<PocketAccount>(a => a.RedirectUrl == CallerCallbackUrl.ToString())), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -102,26 +102,24 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task GenerateAuthUrlGetsRequestTokenUsingCallbackUrlWithProtectedAccessToken()
         {
-            var expectedUri = $"{CallbackUrl}?xAccessToken={ProtectedAccessToken}";
+            var uriBuilder = new UriBuilder(CallbackUrl);
+            uriBuilder.AppendToQuery("xAccessToken", ProtectedAccessToken);
 
             await _service.GenerateAuthUrlAsync(CallbackUrl, CallerCallbackUrl);
 
-            _mockClient.Verify(c => c.CreateRequestCodeAsync(expectedUri), Times.Exactly(1));
+            _mockClient.Verify(c => c.CreateRequestCodeAsync(uriBuilder.Uri), Times.Exactly(1));
         }
 
         [TestMethod]
         public async Task GenerateAuthUrlHandlesExistingQueryParametersInCallbackUrl()
         {
-            const string callbackUrl = CallbackUrl + "?a=b";
-            var accessTokenBytes = Encoding.UTF8.GetBytes(AccessToken);
-            var expectedProtectedValue = WebEncoders.Base64UrlEncode(accessTokenBytes);
+            var uriBuilder = new UriBuilder(CallbackUrl);
+            uriBuilder.AppendToQuery("a", "b");
 
-            _mockDataProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns(accessTokenBytes);
-            var expectedUri = $"{callbackUrl}&xAccessToken={expectedProtectedValue}";
+            await _service.GenerateAuthUrlAsync(uriBuilder.Uri, CallerCallbackUrl);
 
-            await _service.GenerateAuthUrlAsync(callbackUrl, CallerCallbackUrl);
-
-            _mockClient.Verify(c => c.CreateRequestCodeAsync(expectedUri), Times.Exactly(1));
+            uriBuilder.AppendToQuery("xAccessToken", ProtectedAccessToken);
+            _mockClient.Verify(c => c.CreateRequestCodeAsync(uriBuilder.Uri), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -208,7 +206,7 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task DeletesAccountIfClientThrowsExceptionWhenCreatingRequestCode()
         {
-            _mockClient.Setup(c => c.CreateRequestCodeAsync(It.IsAny<string>())).Throws<PocketException>();
+            _mockClient.Setup(c => c.CreateRequestCodeAsync(It.IsAny<Uri>())).Throws<PocketException>();
 
             try
             {

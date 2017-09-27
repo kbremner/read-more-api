@@ -20,7 +20,7 @@ namespace ReadMoreAPI.Services
             _protector = protectionProvider.CreateProtector("access-token-protector");
         }
 
-        public async Task<string> GenerateAuthUrlAsync(string oauthCallbackUrl, string callerRedirectUrl)
+        public async Task<Uri> GenerateAuthUrlAsync(Uri oauthCallbackUrl, Uri callerRedirectUrl)
         {
             // Pocket will redirect back to this app after asking the user to grant us access.
             // So that we can later retrieve the created request code and convert it in to a
@@ -30,7 +30,7 @@ namespace ReadMoreAPI.Services
             // here first before proceeding.
             var entry = await _repo.InsertAsync(new PocketAccount
             {
-                RedirectUrl = callerRedirectUrl
+                RedirectUrl = callerRedirectUrl.ToString()
             });
 
             // add encrypted ID to URL as query parameter
@@ -42,7 +42,7 @@ namespace ReadMoreAPI.Services
             PocketRequestCode requestCode;
             try
             {
-                requestCode = await _client.CreateRequestCodeAsync(uriBuilder.ToString());
+                requestCode = await _client.CreateRequestCodeAsync(uriBuilder.Uri);
             }
             catch (PocketException)
             {

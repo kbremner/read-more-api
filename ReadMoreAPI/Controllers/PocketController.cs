@@ -28,11 +28,11 @@ namespace ReadMoreAPI.Controllers
         [RequiredQueryParameter(Name = "redirectUrl", ActionParameterName = "callerRedirectUrl")]
         public async Task<ActionResult> Authorize(string callerRedirectUrl)
         {
-            var callbackUrl = Url.Action("CompleteAuth", null, null, Request.Scheme);
+            var callbackUrl = new Uri(Url.Action("CompleteAuth", null, null, Request.Scheme));
 
-            var pocketAuthUrl = await _service.GenerateAuthUrlAsync(callbackUrl, callerRedirectUrl);
+            var pocketAuthUrl = await _service.GenerateAuthUrlAsync(callbackUrl, new Uri(callerRedirectUrl));
 
-            return Redirect(pocketAuthUrl);
+            return Redirect(pocketAuthUrl.ToString());
         }
 
         [HttpGet("callback")]

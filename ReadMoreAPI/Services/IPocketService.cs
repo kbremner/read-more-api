@@ -6,7 +6,7 @@ namespace ReadMoreAPI.Services
 {
     public interface IPocketService
     {
-        Task<string> GenerateAuthUrlAsync(string oauthCallbackUrl, string callerRedirectUrl);
+        Task<Uri> GenerateAuthUrlAsync(Uri oauthCallbackUrl, Uri callerRedirectUrl);
         Task<Uri> UpgradeRequestTokenAsync(string accountAccessToken);
         Task<PocketArticle> GetNextArticleAsync(string accessToken);
         Task DeleteArticleAsync(string accountAccessToken, string articleId);

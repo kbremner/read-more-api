@@ -7,7 +7,7 @@ namespace PocketLib
 {
     public class HttpPocketClient : IPocketClient, IDisposable
     {
-        private const string BaseUri = "https://getpocket.com";
+        private static readonly Uri BaseUri = new Uri("https://getpocket.com");
         private const string ApiVersion = "v3";
         private readonly Random _random;
         private readonly IHttpRequestHandler _reqHandler;
@@ -20,14 +20,14 @@ namespace PocketLib
             _consumerKey = consumerKey;
         }
 
-        public async Task<PocketRequestCode> CreateRequestCodeAsync(string redirectUri)
+        public async Task<PocketRequestCode> CreateRequestCodeAsync(Uri redirectUri)
         {
             var reqParams = new Dictionary<string, object>
             {
                 { "consumer_key", _consumerKey },
                 { "redirect_uri", redirectUri }
             };
-            var response = await SafePostAsync<RequestCodeResponse>($"{BaseUri}/{ApiVersion}/oauth/request", reqParams);
+            var response = await SafePostAsync<RequestCodeResponse>($"{BaseUri}{ApiVersion}/oauth/request", reqParams);
 
             return new PocketRequestCode(BaseUri, redirectUri, response.Code);
         }
@@ -39,7 +39,7 @@ namespace PocketLib
                 { "consumer_key", _consumerKey },
                 { "code", requestCode }
             };
-            var response = await SafePostAsync<AccessTokenResponse>($"{BaseUri}/{ApiVersion}/oauth/authorize", reqParams);
+            var response = await SafePostAsync<AccessTokenResponse>($"{BaseUri}{ApiVersion}/oauth/authorize", reqParams);
 
             return response.AccessToken;
         }
@@ -53,7 +53,7 @@ namespace PocketLib
                 { "count", countToRetrieve },
                 { "detailType", "simple" }
             };
-            var response = await SafePostAsync<PocketArticles>($"{BaseUri}/{ApiVersion}/get", reqParams);
+            var response = await SafePostAsync<PocketArticles>($"{BaseUri}{ApiVersion}/get", reqParams);
 
             var articleIndex = _random.Next(response.Articles.Count);
             return response.Articles.Values.ElementAt(articleIndex);
@@ -70,7 +70,7 @@ namespace PocketLib
                     item_id = articleId
                 }}}
             };
-            await SafePostAsync<ArticleActionResponse>($"{BaseUri}/{ApiVersion}/send", reqParams);
+            await SafePostAsync<ArticleActionResponse>($"{BaseUri}{ApiVersion}/send", reqParams);
         }
 
         public async Task ArchiveArticleAsync(string accessToken, string articleId)
@@ -84,7 +84,7 @@ namespace PocketLib
                     item_id = articleId
                 }}}
             };
-            await SafePostAsync<ArticleActionResponse>($"{BaseUri}/{ApiVersion}/send", reqParams);
+            await SafePostAsync<ArticleActionResponse>($"{BaseUri}{ApiVersion}/send", reqParams);
         }
 
         public void Dispose()

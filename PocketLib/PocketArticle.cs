@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 
 namespace PocketLib
@@ -7,12 +8,12 @@ namespace PocketLib
         [JsonProperty("item_id")]
         public string ItemId { get; private set; }
         [JsonProperty("resolved_url")]
-        public string Url { get; private set; }
+        public Uri Url { get; private set; }
         [JsonProperty("resolved_title")]
         public string Title { get; private set; }
 
         [JsonConstructor]
-        public PocketArticle(string itemId, string url, string title)
+        public PocketArticle(string itemId, Uri url, string title)
         {
             ItemId = itemId;
             Url = url;

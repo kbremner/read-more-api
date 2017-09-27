@@ -1,4 +1,5 @@
-﻿using PocketLib;
+﻿using System;
+using PocketLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,12 +17,12 @@ namespace PocketLibTests
         private const string UserName = "pocket-user-name";
         private const string RequestCode = "pocket-request-code";
         private const string ConsumerKey = "pocket-consumer-key";
-        private const string RedirectUri = "http://example.com/a?b=c";
+        private static readonly Uri RedirectUri = new Uri("http://example.com/a?b=c");
         private readonly Dictionary<string, PocketArticle> _articles = new Dictionary<string, PocketArticle> {
-            { "1", new PocketArticle("1", "http://example.com", "Example 1") },
-            { "2", new PocketArticle("2", "http://example.com", "Example 2") },
-            { "3", new PocketArticle("3", "http://example.com", "Example 3") },
-            { "4", new PocketArticle("4", "http://example.com", "Example 4") }
+            { "1", new PocketArticle("1", new Uri("http://example.com"), "Example 1") },
+            { "2", new PocketArticle("2", new Uri("http://example.com"), "Example 2") },
+            { "3", new PocketArticle("3", new Uri("http://example.com"), "Example 3") },
+            { "4", new PocketArticle("4", new Uri("http://example.com"), "Example 4") }
         };
         private readonly Mock<IHttpRequestHandler> _reqHandler;
         private readonly HttpPocketClient _service;
@@ -59,7 +60,7 @@ namespace PocketLibTests
         [TestMethod]
         public async Task RequestCodeCanBeConvertedToAuthUrl()
         {
-            var expectedAuthUrl = $"https://getpocket.com/auth/authorize?request_token={RequestCode}&redirect_uri={RedirectUri}";
+            var expectedAuthUrl = new Uri($"https://getpocket.com/auth/authorize?request_token={RequestCode}&redirect_uri={RedirectUri}");
             SetupResponse(new RequestCodeResponse(RequestCode));
             var requestCode = await _service.CreateRequestCodeAsync(RedirectUri);
 
@@ -208,7 +209,7 @@ namespace PocketLibTests
         {
             _reqHandler.Setup(r => r.PostAsync<RequestCodeResponse>(It.IsAny<string>(), It.IsAny<object>())).ThrowsAsync(new WebException());
 
-            await _service.CreateRequestCodeAsync("");
+            await _service.CreateRequestCodeAsync(new Uri("http://uri/"));
         }
 
         [TestMethod]

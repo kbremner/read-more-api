@@ -17,14 +17,14 @@ namespace ReadMoreAPITests
     [TestClass]
     public class PocketControllerTests
     {
-        private const string PocketUrl = "POCKET_URL";
-        private const string ActionUrl = "ACTION_URL";
+        private static readonly Uri PocketUrl = new Uri("http://pocket-url/");
+        private static readonly Uri ActionUrl = new Uri("http://action-url/");
         private const string AccessToken = "ACCESS_TOKEN";
         private static readonly Uri UrlWithAccessToken = new Uri("http://url-with-access-token");
         private const string PocketAccessToken = "POCKET_ACCESS_TOKEN";
         private const string CallerUrl = "CALLER_URL";
         private const string ArticleId = "ITEM_ID";
-        private const string ArticleUrl = "ARTICLE_URL";
+        private static readonly Uri ArticleUrl = new Uri("http://article-url/");
         private const string ArticleTitle = "ARTICLE_TITLE";
         private const string DeleteUrl = "DELETE_URL";
         private const string ArchiveUrl = "ARCHIVE_URL";
@@ -40,10 +40,10 @@ namespace ReadMoreAPITests
             _article = new PocketArticle(ArticleId, ArticleUrl, ArticleTitle);
 
             _mockService = new Mock<IPocketService>();
-            _mockService.Setup(s => s.GenerateAuthUrlAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(PocketUrl));
+            _mockService.Setup(s => s.GenerateAuthUrlAsync(It.IsAny<Uri>(), It.IsAny<Uri>())).Returns(Task.FromResult(PocketUrl));
 
             _mockUrlHelper = new Mock<IUrlHelper>();
-            _mockUrlHelper.Setup(s => s.Action(It.Is<UrlActionContext>(c => c.Action == "CompleteAuth"))).Returns(ActionUrl);
+            _mockUrlHelper.Setup(s => s.Action(It.Is<UrlActionContext>(c => c.Action == "CompleteAuth"))).Returns(ActionUrl.ToString());
             _mockUrlHelper.Setup(s => s.Action(It.Is<UrlActionContext>(c => c.Action == "DeleteArticleAsync"))).Returns(DeleteUrl);
             _mockUrlHelper.Setup(s => s.Action(It.Is<UrlActionContext>(c => c.Action == "ArchiveArticleAsync"))).Returns(ArchiveUrl);
 
@@ -62,15 +62,17 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task AuthorizeGetsUrlFromPocketService()
         {
-            await _controller.Authorize("url");
+            var expectedUri = new Uri("http://uri/");
+            await _controller.Authorize(expectedUri.ToString());
 
-            _mockService.Verify(s => s.GenerateAuthUrlAsync(ActionUrl, "url"));
+            _mockService.Verify(s => s.GenerateAuthUrlAsync(ActionUrl, expectedUri));
         }
 
         [TestMethod]
         public async Task AuthorizeRedirectsUser()
         {
-            var result = await _controller.Authorize("url");
+            var expectedUri = new Uri("http://uri/");
+            var result = await _controller.Authorize(expectedUri.ToString());
 
             Assert.IsInstanceOfType(result, typeof(RedirectResult));
         }
@@ -78,7 +80,8 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task AuthorizeRedirectsToUrlFromPocketService()
         {
-            var result = (RedirectResult) await _controller.Authorize("url");
+            var expectedUri = new Uri("http://uri/");
+            var result = (RedirectResult) await _controller.Authorize(expectedUri.ToString());
 
             Assert.AreEqual(PocketUrl, result.Url);
         }
