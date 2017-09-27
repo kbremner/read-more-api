@@ -223,15 +223,6 @@ namespace ReadMoreAPITests
         }
 
         [TestMethod]
-        public void ProtectsAccountIdBeforeAppendingToUrl()
-        {
-            _service.AppendAccessTokenToUrl(_account, CallerCallbackUrl);
-
-            _mockDataProtector.Verify(p => p.Protect(It.Is<byte[]>(
-                b => b.SequenceEqual(Encoding.UTF8.GetBytes(_accountId.ToString())))), Times.Exactly(1));
-        }
-
-        [TestMethod]
         public async Task GetsPocketAccountAssociatedWithAccessTokenWhenGettingNextArticle()
         {
             await _service.GetNextArticleAsync(AccessToken);

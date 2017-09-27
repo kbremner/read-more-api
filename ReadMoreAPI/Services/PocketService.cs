@@ -34,13 +34,15 @@ namespace ReadMoreAPI.Services
             });
 
             // add encrypted ID to URL as query parameter
-            var uri = AppendAccessTokenToUrl(entry, oauthCallbackUrl);
+            var protectedAccessToken = _protector.Protect(entry.Id.ToString());
+            var uriBuilder = new UriBuilder(oauthCallbackUrl);
+            uriBuilder.AppendToQuery("xAccessToken", protectedAccessToken);
 
             // Can now get a request token to start the process
             PocketRequestCode requestCode;
             try
             {
-                requestCode = await _client.CreateRequestCodeAsync(uri);
+                requestCode = await _client.CreateRequestCodeAsync(uriBuilder.ToString());
             }
             catch (PocketException)
             {
@@ -108,14 +110,6 @@ namespace ReadMoreAPI.Services
             var account = await _repo.FindByIdAsync(new Guid(id));
 
             await _client.ArchiveArticleAsync(account.AccessToken, articleId);
-        }
-
-        public string AppendAccessTokenToUrl(PocketAccount account, string url)
-        {
-            var protectedAccessToken = _protector.Protect(account.Id.ToString());
-            var uri = new UriBuilder(url);
-            uri.AppendToQuery("xAccessToken", protectedAccessToken);
-            return uri.ToString();
         }
     }
 }
