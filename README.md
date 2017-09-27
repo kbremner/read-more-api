@@ -1,5 +1,5 @@
 # read-more-api [![CircleCI](https://circleci.com/gh/defining-technology/read-more-api.svg?style=svg)](https://circleci.com/gh/defining-technology/read-more-api)
-Backend for [Readmore extension](https://github.com/defining-technology/readmore-chrome).
+Backend for [ReadMore extension](https://github.com/defining-technology/readmore-chrome).
 
 ## Architecture Decisions
 
@@ -12,6 +12,10 @@ The ADRs for this project can be found [here](ReadMoreAPI/doc/adr).
 The project can be built and run with Visual Studio 2017, or by using the dotnet command line tool.
 
 The solution uses Docker, meaning that the only Windows version that can be used for building this project is Windows 10 Pro.
+
+## Running With Chrome Extension
+
+A URL can be specified when building the associated [Readmore extension](https://github.com/defining-technology/readmore-chrome) so that it can use a version of this project running locally. Instructions on how to do this can be found [here](https://github.com/defining-technology/readmore-chrome).
 
 ## Contributing
 
