@@ -11,5 +11,6 @@ namespace ReadMoreData.Models
         public string RequestToken { get; set; }
         public string AccessToken { get; set; }
         public string Username { get; set; }
+        public Guid EmailUserId { get; set; }
     }
 }
