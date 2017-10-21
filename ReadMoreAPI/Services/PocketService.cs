@@ -68,13 +68,32 @@ namespace ReadMoreAPI.Services
             {
                 // convert request token from PocketAccount in to pocket access token
                 var accessTokenResult = await _client.CreateAccessTokenAsync(account.RequestToken);
-                account.AccessToken = accessTokenResult.AccessToken;
-                account.Username = accessTokenResult.Username;
-                account.RequestToken = null;
 
-                // update PocketAccount with pocket access token
-                await _repo.UpdateAsync(account);
+                // we've got a username now, so check if an account already exists with that username
+                var usernameAccount = await _repo.FindByUsernameAsync(accessTokenResult.Username);
+                if (usernameAccount != null)
+                {
+                    // user has already registered, so update their account with the new access token
+                    usernameAccount.AccessToken = accessTokenResult.AccessToken;
+                    await _repo.UpdateAsync(usernameAccount);
 
+                    // and delete the temporary account
+                    await _repo.DeleteAsync(account);
+
+                    // update the account access token that will be added to the url
+                    accountAccessToken = _protector.Protect(usernameAccount.Id.ToString());
+                }
+                else
+                {
+                    // user hasn't signed in before, so update the temporary account with details
+                    account.AccessToken = accessTokenResult.AccessToken;
+                    account.Username = accessTokenResult.Username;
+                    account.RequestToken = null;
+
+                    // and save it
+                    await _repo.UpdateAsync(account);
+                }
+                
                 // add the access token to the redirect url
                 uriBuilder.AppendToQuery("xAccessToken", accountAccessToken);
             }

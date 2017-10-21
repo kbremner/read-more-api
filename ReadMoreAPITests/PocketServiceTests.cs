@@ -24,7 +24,6 @@ namespace ReadMoreAPITests
         private static readonly Uri CallerCallbackUrl = new Uri("http://caller-callback-url/");
         private const string AccessToken = "ACCESS_TOKEN";
         private static readonly byte[] AccessTokenBytes = Encoding.UTF8.GetBytes(AccessToken);
-        private static readonly string ProtectedAccessToken = WebEncoders.Base64UrlEncode(AccessTokenBytes);
         private const string PocketAccessToken = "POCKET_ACCESS_TOKEN";
         private const string PocketUserName = "POCKET_USER_NAME";
         private const string ArticleId = "ARTICLE_ID";
@@ -105,8 +104,9 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task GenerateAuthUrlGetsRequestTokenUsingCallbackUrlWithProtectedAccessToken()
         {
+            var expectedAccessToken = _mockDataProtector.Object.Protect(AccessToken);
             var uriBuilder = new UriBuilder(CallbackUrl);
-            uriBuilder.AppendToQuery("xAccessToken", ProtectedAccessToken);
+            uriBuilder.AppendToQuery("xAccessToken", expectedAccessToken);
 
             await _service.GenerateAuthUrlAsync(CallbackUrl, CallerCallbackUrl);
 
@@ -116,12 +116,13 @@ namespace ReadMoreAPITests
         [TestMethod]
         public async Task GenerateAuthUrlHandlesExistingQueryParametersInCallbackUrl()
         {
+            var expectedAccessToken = _mockDataProtector.Object.Protect(AccessToken);
             var uriBuilder = new UriBuilder(CallbackUrl);
             uriBuilder.AppendToQuery("a", "b");
 
             await _service.GenerateAuthUrlAsync(uriBuilder.Uri, CallerCallbackUrl);
 
-            uriBuilder.AppendToQuery("xAccessToken", ProtectedAccessToken);
+            uriBuilder.AppendToQuery("xAccessToken", expectedAccessToken);
             _mockClient.Verify(c => c.CreateRequestCodeAsync(uriBuilder.Uri), Times.Exactly(1));
         }
 
@@ -158,7 +159,7 @@ namespace ReadMoreAPITests
         }
 
         [TestMethod]
-        public async Task ReturnedUriIncludesCreatedPocketAccessToken()
+        public async Task ReturnedUriIncludesProvidedAccessToken()
         {
             var uriBuilder = new UriBuilder(CallerCallbackUrl);
             uriBuilder.AppendToQuery("xAccessToken", AccessToken);
@@ -269,6 +270,44 @@ namespace ReadMoreAPITests
             await _service.ArchiveArticleAsync(AccessToken, ArticleId);
 
             _mockClient.Verify(c => c.ArchiveArticleAsync(_account.AccessToken, ArticleId), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeletesNewAccountIfAccountAlreadyExistsForUsername()
+        {
+            var existingAccount = new PocketAccount();
+            _mockRepo.Setup(r => r.FindByUsernameAsync(PocketUserName)).ReturnsAsync(existingAccount);
+
+            await _service.UpgradeRequestTokenAsync(AccessToken);
+
+            _mockRepo.Verify(r => r.DeleteAsync(_account), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task UpdatesAccessTokenForExistingAccount()
+        {
+            var existingAccount = new PocketAccount();
+            _mockRepo.Setup(r => r.FindByUsernameAsync(PocketUserName)).ReturnsAsync(existingAccount);
+
+            await _service.UpgradeRequestTokenAsync(AccessToken);
+
+            Assert.AreEqual(PocketAccessToken, existingAccount.AccessToken);
+        }
+
+        [TestMethod]
+        public async Task UsesProtectedIdOfExistingAccountInUrl()
+        {
+            var existingAccount = new PocketAccount { Id = Guid.NewGuid() };
+            var existingTokenBytes = Encoding.UTF8.GetBytes(existingAccount.Id.ToString());
+            _mockDataProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns(existingTokenBytes);
+            var expectedToken = _mockDataProtector.Object.Protect(existingAccount.Id.ToString());
+            var uriBuilder = new UriBuilder(CallerCallbackUrl);
+            uriBuilder.AppendToQuery("xAccessToken", expectedToken);
+            _mockRepo.Setup(r => r.FindByUsernameAsync(PocketUserName)).ReturnsAsync(existingAccount);
+
+            var result = await _service.UpgradeRequestTokenAsync(AccessToken);
+
+            Assert.AreEqual(uriBuilder.Uri, result);
         }
     }
 }
