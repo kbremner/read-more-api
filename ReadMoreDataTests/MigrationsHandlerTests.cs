@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using Dapper;
 using Microsoft.Extensions.FileProviders;
@@ -70,8 +71,8 @@ namespace ReadMoreDataTests
         [TestMethod]
         public void ExecutesScriptsNotInMigrationScriptsTable()
         {
-            const string excludedFileName = "20170312-2248-CreatePocketAccountTable.sql";
             var files = PostgresTestHelper.GetMigrationScripts();
+            var excludedFileName = files[files.Length - 1].Name;
             _postgresTestHelper.Connection.Execute(MigrationsHandler.CreateMigrationScriptsTable);
             _postgresTestHelper.AddExecutedScript(excludedFileName);
 
