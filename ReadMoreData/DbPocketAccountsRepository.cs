@@ -27,7 +27,7 @@ namespace ReadMoreData
         {
             using (var conn = Connection)
             {
-                return await conn.QuerySingleAsync<PocketAccount>(
+                return await conn.QuerySingleOrDefaultAsync<PocketAccount>(
                     $"SELECT * FROM {TableName} WHERE Username = @Username", new { Username = username });
             }
         }

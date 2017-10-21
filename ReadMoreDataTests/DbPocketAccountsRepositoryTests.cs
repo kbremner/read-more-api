@@ -189,5 +189,15 @@ namespace ReadMoreDataTests
             {
             }
         }
+
+        [TestMethod]
+        public async Task FindByUsernameReturnsNullIfNoneFound()
+        {
+            var repo = new DbPocketAccountsRepository(_postgresTestHelper.ConnectionFactory);
+
+            var result = await repo.FindByUsernameAsync("user-name");
+
+            Assert.IsNull(result);
+        }
     }
 }
