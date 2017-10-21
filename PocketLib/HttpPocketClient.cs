@@ -32,7 +32,7 @@ namespace PocketLib
             return new PocketRequestCode(BaseUri, redirectUri, response.Code);
         }
 
-        public async Task<string> CreateAccessTokenAsync(string requestCode)
+        public async Task<PocketAccessToken> CreateAccessTokenAsync(string requestCode)
         {
             var reqParams = new Dictionary<string, object>
             {
@@ -41,7 +41,7 @@ namespace PocketLib
             };
             var response = await SafePostAsync<AccessTokenResponse>($"{BaseUri}{ApiVersion}/oauth/authorize", reqParams);
 
-            return response.AccessToken;
+            return new PocketAccessToken(response.Username, response.AccessToken);
         }
 
         public async Task<PocketArticle> GetRandomArticleAsync(string accessToken, int countToRetrieve = 200)

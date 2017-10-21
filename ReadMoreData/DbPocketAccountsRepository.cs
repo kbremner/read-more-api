@@ -23,13 +23,22 @@ namespace ReadMoreData
             }
         }
 
+        public async Task<PocketAccount> FindByUsernameAsync(string username)
+        {
+            using (var conn = Connection)
+            {
+                return await conn.QuerySingleAsync<PocketAccount>(
+                    $"SELECT * FROM {TableName} WHERE Username = @Username", new { Username = username });
+            }
+        }
+
         public async Task<PocketAccount> InsertAsync(PocketAccount account)
         {
             using (var conn = Connection)
             {
                 return await conn.QuerySingleAsync<PocketAccount>(
-                    $"INSERT INTO {TableName} (AccessToken, RequestToken, RedirectUrl) " +
-                    "VALUES (@AccessToken, @RequestToken, @RedirectUrl) returning *", account);
+                    $"INSERT INTO {TableName} (AccessToken, RequestToken, RedirectUrl, Username) " +
+                    "VALUES (@AccessToken, @RequestToken, @RedirectUrl, @Username) returning *", account);
             }
         }
 
@@ -38,7 +47,7 @@ namespace ReadMoreData
             using (var conn = Connection)
             {
                 await conn.ExecuteAsync($"UPDATE {TableName} " +
-                    "SET AccessToken = @AccessToken, RequestToken = @RequestToken, RedirectUrl = @RedirectUrl " +
+                    "SET AccessToken = @AccessToken, RequestToken = @RequestToken, RedirectUrl = @RedirectUrl, Username = @Username " +
                     "WHERE Id = @Id", account);
             }
         }

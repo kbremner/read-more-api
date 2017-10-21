@@ -67,7 +67,9 @@ namespace ReadMoreAPI.Services
             try
             {
                 // convert request token from PocketAccount in to pocket access token
-                account.AccessToken = await _client.CreateAccessTokenAsync(account.RequestToken);
+                var accessTokenResult = await _client.CreateAccessTokenAsync(account.RequestToken);
+                account.AccessToken = accessTokenResult.AccessToken;
+                account.Username = accessTokenResult.Username;
                 account.RequestToken = null;
 
                 // update PocketAccount with pocket access token

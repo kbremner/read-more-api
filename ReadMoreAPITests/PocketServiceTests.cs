@@ -26,6 +26,7 @@ namespace ReadMoreAPITests
         private static readonly byte[] AccessTokenBytes = Encoding.UTF8.GetBytes(AccessToken);
         private static readonly string ProtectedAccessToken = WebEncoders.Base64UrlEncode(AccessTokenBytes);
         private const string PocketAccessToken = "POCKET_ACCESS_TOKEN";
+        private const string PocketUserName = "POCKET_USER_NAME";
         private const string ArticleId = "ARTICLE_ID";
         private static readonly Uri ArticleUrl = new Uri("http://article-url/");
         private const string ArticleTitle = "ARTICLE_TITLE";
@@ -33,6 +34,7 @@ namespace ReadMoreAPITests
         private Guid _accountId;
         private PocketAccount _account;
         private PocketRequestCode _code;
+        private PocketAccessToken _accessTokenResult;
         private Mock<IPocketClient> _mockClient;
         private Mock<IPocketAccountsRepository> _mockRepo;
         private Mock<IDataProtector> _mockDataProtector;
@@ -44,6 +46,7 @@ namespace ReadMoreAPITests
         {
             _accountId = Guid.NewGuid();
             _code = new PocketRequestCode(BaseUri, RedirectUri, RequestCode);
+            _accessTokenResult = new PocketAccessToken(PocketUserName, PocketAccessToken);
             _account = new PocketAccount
             {
                 Id = _accountId,
@@ -63,7 +66,7 @@ namespace ReadMoreAPITests
             
             _mockClient = new Mock<IPocketClient>();
             _mockClient.Setup(c => c.CreateRequestCodeAsync(It.IsAny<Uri>())).ReturnsAsync(_code);
-            _mockClient.Setup(c => c.CreateAccessTokenAsync(RequestCode)).ReturnsAsync(PocketAccessToken);
+            _mockClient.Setup(c => c.CreateAccessTokenAsync(RequestCode)).ReturnsAsync(_accessTokenResult);
             _mockClient.Setup(c => c.GetRandomArticleAsync(PocketAccessToken, 200)).ReturnsAsync(_article);
 
             _mockDataProtector = new Mock<IDataProtector>();

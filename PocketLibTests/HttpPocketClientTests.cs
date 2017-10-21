@@ -88,7 +88,18 @@ namespace PocketLibTests
 
             var result = await _service.CreateAccessTokenAsync(RequestCode);
 
-            Assert.AreEqual(AccessToken, result);
+            Assert.AreEqual(AccessToken, result.AccessToken);
+        }
+
+        [TestMethod]
+        public async Task ReturnsUsernameFromResponse()
+        {
+            SetupResponse(new AccessTokenResponse(AccessToken, UserName));
+
+            var result = await _service.CreateAccessTokenAsync(RequestCode);
+
+            Assert.AreEqual(AccessToken, result.AccessToken);
+            Assert.AreEqual(UserName, result.Username);
         }
 
         [TestMethod]

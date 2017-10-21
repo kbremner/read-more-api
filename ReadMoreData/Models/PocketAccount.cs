@@ -10,5 +10,6 @@ namespace ReadMoreData.Models
         public string RedirectUrl { get; set; }
         public string RequestToken { get; set; }
         public string AccessToken { get; set; }
+        public string Username { get; set; }
     }
 }
