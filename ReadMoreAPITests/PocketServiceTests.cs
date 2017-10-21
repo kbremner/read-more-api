@@ -309,5 +309,16 @@ namespace ReadMoreAPITests
 
             Assert.AreEqual(uriBuilder.Uri, result);
         }
+
+        [TestMethod]
+        public async Task UpdatesRedirectUrlForExistingAccount()
+        {
+            var existingAccount = new PocketAccount();
+            _mockRepo.Setup(r => r.FindByUsernameAsync(PocketUserName)).ReturnsAsync(existingAccount);
+
+            await _service.UpgradeRequestTokenAsync(AccessToken);
+
+            Assert.AreEqual(CallerCallbackUrl, existingAccount.RedirectUrl);
+        }
     }
 }

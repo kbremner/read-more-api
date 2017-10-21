@@ -74,7 +74,9 @@ namespace ReadMoreAPI.Services
                 if (usernameAccount != null)
                 {
                     // user has already registered, so update their account with the new access token
+                    // and the latest redirect URL
                     usernameAccount.AccessToken = accessTokenResult.AccessToken;
+                    usernameAccount.RedirectUrl = account.RedirectUrl;
                     await _repo.UpdateAsync(usernameAccount);
 
                     // and delete the temporary account
