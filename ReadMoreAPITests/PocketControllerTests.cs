@@ -117,7 +117,7 @@ namespace ReadMoreAPITests
 
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             var jsonResult = (JsonResult) result;
-            Assert.AreEqual(ArticleUrl, GetProperty(jsonResult.Value, "url"));
+            Assert.AreEqual(ArticleUrl, jsonResult.Value.GetProperty("url"));
         }
 
         [TestMethod]
@@ -139,8 +139,8 @@ namespace ReadMoreAPITests
 
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             var jsonResult = (JsonResult)result;
-            var actions = GetProperty(jsonResult.Value, "actions");
-            Assert.AreEqual(DeleteUrl, GetProperty(actions, "delete"));
+            var actions = jsonResult.Value.GetProperty("actions");
+            Assert.AreEqual(DeleteUrl, actions.GetProperty("delete"));
         }
 
         [TestMethod]
@@ -172,8 +172,8 @@ namespace ReadMoreAPITests
 
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             var jsonResult = (JsonResult)result;
-            var actions = GetProperty(jsonResult.Value, "actions");
-            Assert.AreEqual(ArchiveUrl, GetProperty(actions, "archive"));
+            var actions = jsonResult.Value.GetProperty("actions");
+            Assert.AreEqual(ArchiveUrl, actions.GetProperty("archive"));
         }
 
         [TestMethod]
@@ -236,13 +236,6 @@ namespace ReadMoreAPITests
             Assert.IsInstanceOfType(result, typeof(ObjectResult));
             var objectResult = (ObjectResult)result;
             Assert.AreEqual(403, objectResult.StatusCode);
-        }
-
-        private static dynamic GetProperty(dynamic val, string propertyName)
-        {
-            var property = val.GetType().GetProperty(propertyName);
-            Assert.IsNotNull(property, $"Value has no property called '{propertyName}'");
-            return property.GetValue(val, null);
         }
     }
 }
