@@ -41,18 +41,12 @@ namespace ReadMoreAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ReceiveEmail()
+        [RequiredFormParameter(Name = "subject")]
+        [RequiredFormParameter(Name = "recipient")]
+        [RequiredFormParameter(Name = "stripped-html", ActionParameterName = "body")]
+        public IActionResult ReceiveEmail(string subject, string recipient, string body)
         {
-            string body;
-            using (var reader = new StreamReader(Request.Body))
-            {
-                body = await reader.ReadToEndAsync();
-            }
-
-            _logger.LogInformation(
-                $"Email received:\n{body}\n{string.Join(" : ", Request.Headers.Select(x => $"{x.Key}={x.Value}"))}");
-
-            return NoContent();
+            return Ok(new {subject, recipient, body});
         }
     }
 }
