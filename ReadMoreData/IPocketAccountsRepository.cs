@@ -1,5 +1,6 @@
 ﻿using ReadMoreData.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ReadMoreData
@@ -11,5 +12,6 @@ namespace ReadMoreData
         Task<PocketAccount> InsertAsync(PocketAccount account);
         Task UpdateAsync(PocketAccount account);
         Task DeleteAsync(PocketAccount account);
+        Task<IEnumerable<FeatureToggle>> FindTogglesForAccountAsync(Guid id);
     }
 }

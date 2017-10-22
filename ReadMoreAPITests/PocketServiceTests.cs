@@ -31,6 +31,7 @@ namespace ReadMoreAPITests
         private const string ArticleTitle = "ARTICLE_TITLE";
         private PocketArticle _article;
         private Guid _accountId;
+        private Guid _emailUserId;
         private PocketAccount _account;
         private PocketRequestCode _code;
         private PocketAccessToken _accessTokenResult;
@@ -44,6 +45,7 @@ namespace ReadMoreAPITests
         public void Setup()
         {
             _accountId = Guid.NewGuid();
+            _emailUserId = Guid.NewGuid();
             _code = new PocketRequestCode(BaseUri, RedirectUri, RequestCode);
             _accessTokenResult = new PocketAccessToken(PocketUserName, PocketAccessToken);
             _account = new PocketAccount
@@ -51,7 +53,8 @@ namespace ReadMoreAPITests
                 Id = _accountId,
                 RequestToken = RequestCode,
                 AccessToken = PocketAccessToken,
-                RedirectUrl = CallerCallbackUrl.ToString()
+                RedirectUrl = CallerCallbackUrl.ToString(),
+                EmailUserId = _emailUserId
             };
             _article = new PocketArticle(ArticleId, ArticleUrl, ArticleTitle);
 
@@ -319,6 +322,31 @@ namespace ReadMoreAPITests
             await _service.UpgradeRequestTokenAsync(AccessToken);
 
             Assert.AreEqual(CallerCallbackUrl, existingAccount.RedirectUrl);
+        }
+
+        [TestMethod]
+        public async Task ReturnsEmailAddressContainingEmailUserIdForAccount()
+        {
+            var result = await _service.GetBacklogEmailAddressAsync(AccessToken);
+
+            Assert.AreEqual($"{_emailUserId}@readmore.defining.tech", result);
+        }
+
+        [TestMethod]
+        public async Task ReturnsTogglesFromRepo()
+        {
+            var toggle = new FeatureToggle
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test Toggle",
+                Description = "Test Feature Toggle Description"
+            };
+            var toggles = new[] {toggle};
+            _mockRepo.Setup(r => r.FindTogglesForAccountAsync(_accountId)).ReturnsAsync(toggles);
+
+            var result = await _service.GetFeatureTogglesAsync(AccessToken);
+
+            CollectionAssert.AreEqual(toggles, result.ToList());
         }
     }
 }

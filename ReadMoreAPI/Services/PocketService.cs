@@ -3,6 +3,8 @@ using PocketLib;
 using ReadMoreData;
 using ReadMoreData.Models;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ReadMoreAPI.Services
@@ -140,6 +142,12 @@ namespace ReadMoreAPI.Services
             var id = _protector.Unprotect(accountAccessToken);
             var account = await _repo.FindByIdAsync(new Guid(id));
             return $"{account.EmailUserId.ToString()}@readmore.defining.tech";
+        }
+
+        public async Task<IEnumerable<FeatureToggle>> GetFeatureTogglesAsync(string accountAccessToken)
+        {
+            var id = _protector.Unprotect(accountAccessToken);
+            return await _repo.FindTogglesForAccountAsync(new Guid(id));
         }
     }
 }

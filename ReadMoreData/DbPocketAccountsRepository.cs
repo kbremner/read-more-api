@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using ReadMoreData.Models;
@@ -9,6 +10,8 @@ namespace ReadMoreData
     public class DbPocketAccountsRepository : DbConnectionRepository, IPocketAccountsRepository
     {
         private const string TableName = "\"PocketAccounts\"";
+        private const string FeatureToggleTableName = "\"FeatureToggles\"";
+        private const string FeatureToggleJoinTableName = "\"PocketAccountFeatureToggles\"";
 
         public DbPocketAccountsRepository(Func<IDbConnection> connectionFactory) : base(connectionFactory)
         {
@@ -57,6 +60,18 @@ namespace ReadMoreData
             using (var conn = Connection)
             {
                 await conn.ExecuteAsync($"DELETE FROM {TableName} WHERE Id = @Id", account);
+            }
+        }
+
+        public async Task<IEnumerable<FeatureToggle>> FindTogglesForAccountAsync(Guid id)
+        {
+            using (var conn = Connection)
+            {
+                return await conn.QueryAsync<FeatureToggle>(
+                    $"SELECT t.* FROM {FeatureToggleTableName} t " +
+                    $"INNER JOIN {FeatureToggleJoinTableName} a " +
+                    "ON a.ToggleId = t.Id " +
+                    "WHERE a.AccountId = @Id", new { Id = id });
             }
         }
     }

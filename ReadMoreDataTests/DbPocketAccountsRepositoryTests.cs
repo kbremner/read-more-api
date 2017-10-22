@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using ReadMoreData;
@@ -204,6 +206,54 @@ namespace ReadMoreDataTests
             var result = await repo.FindByUsernameAsync("user-name");
 
             Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task FindsFeatureTogglesForAccount()
+        {
+            var account = new PocketAccount
+            {
+                AccessToken = "access-token",
+                RedirectUrl = "http://example.com",
+                RequestToken = "request-token",
+                Username = "user-name"
+            };
+            var toggles = new[]
+            {
+                new FeatureToggle
+                {
+                    Name = "Sample Toggle 1",
+                    Description = "First Toggle"
+                },
+                new FeatureToggle
+                {
+                    Name = "Sample Toggle 2",
+                    Description = "Second Toggle"
+                }
+            };
+            var repo = new DbPocketAccountsRepository(_postgresTestHelper.ConnectionFactory);
+            var insertedAccount = await repo.InsertAsync(account);
+            var insertedToggles = new List<FeatureToggle>(toggles.Length);
+            foreach (var toggle in toggles)
+            {
+                var insertedToggle = await _postgresTestHelper.Connection.QuerySingleAsync<FeatureToggle>(
+                    "INSERT INTO \"FeatureToggles\" (Name, Description) VALUES (@Name, @Description) RETURNING *",
+                    toggle);
+                insertedToggles.Add(insertedToggle);
+            }
+            // inserted our account and toggles, want to know link the last toggle to our account
+            await _postgresTestHelper.Connection.ExecuteAsync(
+                "INSERT INTO \"PocketAccountFeatureToggles\" (AccountId, ToggleId) VALUES (@AccountId, @ToggleId)",
+                new { AccountId = insertedAccount.Id, ToggleId = insertedToggles[1].Id });
+
+            var result = await repo.FindTogglesForAccountAsync(insertedAccount.Id);
+            var resultList = result.ToList();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, resultList.Count);
+            Assert.AreEqual(insertedToggles[1].Id, resultList[0].Id);
+            Assert.AreEqual(insertedToggles[1].Name, resultList[0].Name);
+            Assert.AreEqual(insertedToggles[1].Description, resultList[0].Description);
         }
     }
 }
