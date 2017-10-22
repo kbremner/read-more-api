@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -36,6 +38,21 @@ namespace ReadMoreAPI.Controllers
                 _logger.LogError(e, "Failed to get backlog email address");
                 return StatusCode((int)HttpStatusCode.Forbidden, new { error = "Failed to get backlog email address" });
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReceiveEmail()
+        {
+            string body;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                body = await reader.ReadToEndAsync();
+            }
+
+            _logger.LogInformation(
+                $"Email received:\n{body}\n{string.Join(" : ", Request.Headers.Select(x => $"{x.Key}={x.Value}"))}");
+
+            return NoContent();
         }
     }
 }
