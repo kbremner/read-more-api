@@ -137,13 +137,6 @@ namespace ReadMoreAPI.Services
             await _client.ArchiveArticleAsync(account.AccessToken, articleId);
         }
 
-        public async Task<string> GetBacklogEmailAddressAsync(string accountAccessToken)
-        {
-            var id = _protector.Unprotect(accountAccessToken);
-            var account = await _repo.FindByIdAsync(new Guid(id));
-            return $"{account.EmailUserId.ToString()}@readmore.defining.tech";
-        }
-
         public async Task<IEnumerable<FeatureToggle>> GetFeatureTogglesAsync(string accountAccessToken)
         {
             var id = _protector.Unprotect(accountAccessToken);

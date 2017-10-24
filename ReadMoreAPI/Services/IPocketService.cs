@@ -14,7 +14,6 @@ namespace ReadMoreAPI.Services
         Task<PocketArticle> GetNextArticleAsync(string accessToken);
         Task DeleteArticleAsync(string accountAccessToken, string articleId);
         Task ArchiveArticleAsync(string accountAccessToken, string articleId);
-        Task<string> GetBacklogEmailAddressAsync(string xAccessToken);
         Task<IEnumerable<FeatureToggle>> GetFeatureTogglesAsync(string xAccessToken);
     }
 }

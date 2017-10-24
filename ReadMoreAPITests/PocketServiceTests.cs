@@ -53,8 +53,7 @@ namespace ReadMoreAPITests
                 Id = _accountId,
                 RequestToken = RequestCode,
                 AccessToken = PocketAccessToken,
-                RedirectUrl = CallerCallbackUrl.ToString(),
-                EmailUserId = _emailUserId
+                RedirectUrl = CallerCallbackUrl.ToString()
             };
             _article = new PocketArticle(ArticleId, ArticleUrl, ArticleTitle);
 
@@ -322,14 +321,6 @@ namespace ReadMoreAPITests
             await _service.UpgradeRequestTokenAsync(AccessToken);
 
             Assert.AreEqual(CallerCallbackUrl, existingAccount.RedirectUrl);
-        }
-
-        [TestMethod]
-        public async Task ReturnsEmailAddressContainingEmailUserIdForAccount()
-        {
-            var result = await _service.GetBacklogEmailAddressAsync(AccessToken);
-
-            Assert.AreEqual($"{_emailUserId}@readmore.defining.tech", result);
         }
 
         [TestMethod]

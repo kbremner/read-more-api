@@ -72,7 +72,6 @@ namespace ReadMoreDataTests
             Assert.AreEqual(result.RedirectUrl, actualAccount.RedirectUrl);
             Assert.AreEqual(result.RequestToken, actualAccount.RequestToken);
             Assert.AreEqual(result.Username, actualAccount.Username);
-            Assert.AreEqual(result.EmailUserId, actualAccount.EmailUserId);
         }
 
         [TestMethod]
@@ -93,8 +92,7 @@ namespace ReadMoreDataTests
                 AccessToken = "access-token2",
                 RedirectUrl = "http://example.com",
                 RequestToken = "request-token2",
-                Username = "user-name2",
-                EmailUserId = insertedAccount.EmailUserId
+                Username = "user-name2"
             };
             await repo.UpdateAsync(updatedAccount);
             var actualAccount = await _postgresTestHelper.Connection.QuerySingleAsync<PocketAccount>(
@@ -106,7 +104,6 @@ namespace ReadMoreDataTests
             Assert.AreEqual(updatedAccount.RedirectUrl, actualAccount.RedirectUrl);
             Assert.AreEqual(updatedAccount.RequestToken, actualAccount.RequestToken);
             Assert.AreEqual(updatedAccount.Username, actualAccount.Username);
-            Assert.AreEqual(updatedAccount.EmailUserId, actualAccount.EmailUserId);
         }
 
         [TestMethod]
@@ -148,7 +145,6 @@ namespace ReadMoreDataTests
             Assert.AreEqual(insertedAccount.AccessToken, result.AccessToken);
             Assert.AreEqual(insertedAccount.RedirectUrl, result.RedirectUrl);
             Assert.AreEqual(insertedAccount.Username, result.Username);
-            Assert.AreEqual(insertedAccount.EmailUserId, result.EmailUserId);
         }
 
         [TestMethod]
@@ -172,7 +168,6 @@ namespace ReadMoreDataTests
             Assert.AreEqual(insertedAccount.AccessToken, result.AccessToken);
             Assert.AreEqual(insertedAccount.RedirectUrl, result.RedirectUrl);
             Assert.AreEqual(insertedAccount.Username, result.Username);
-            Assert.AreEqual(insertedAccount.EmailUserId, result.EmailUserId);
         }
 
         [TestMethod]
